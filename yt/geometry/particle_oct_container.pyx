@@ -12,7 +12,7 @@ from libc.string cimport memset
 from libc.math cimport floor, ceil, fmod
 from libcpp.map cimport map
 from libcpp.vector cimport vector
-from yt.utilities.lib.ewah_bool_array cimport \
+from ewah_bool_utils.ewah_bool_array cimport \
     ewah_bool_array, ewah_bool_iterator, ewah_map, bool_array, ewah_word_type
 import numpy as np
 cimport numpy as np
@@ -36,8 +36,8 @@ from collections import defaultdict
 from yt.funcs import get_pbar
 
 from particle_deposit cimport gind
-#from yt.utilities.lib.ewah_bool_wrap cimport \
-from ..utilities.lib.ewah_bool_wrap cimport BoolArrayCollection
+#from ewah_bool_utils.ewah_bool_wrap cimport \
+from ewah_bool_utils.ewah_bool_wrap cimport BoolArrayCollection
 import struct
 import os
 
@@ -49,10 +49,10 @@ DEF RefinedExternalGhosts = 1
 
 _bitmask_version = np.uint64(5)
 
-from ..utilities.lib.ewah_bool_wrap cimport SparseUnorderedBitmaskSet as SparseUnorderedBitmask
-from ..utilities.lib.ewah_bool_wrap cimport SparseUnorderedRefinedBitmaskSet as SparseUnorderedRefinedBitmask
-from ..utilities.lib.ewah_bool_wrap cimport BoolArrayCollectionUncompressed as BoolArrayColl
-from ..utilities.lib.ewah_bool_wrap cimport FileBitmasks
+from ewah_bool_utils.ewah_bool_wrap cimport SparseUnorderedBitmaskSet as SparseUnorderedBitmask
+from ewah_bool_utils.ewah_bool_wrap cimport SparseUnorderedRefinedBitmaskSet as SparseUnorderedRefinedBitmask
+from ewah_bool_utils.ewah_bool_wrap cimport BoolArrayCollectionUncompressed as BoolArrayColl
+from ewah_bool_utils.ewah_bool_wrap cimport FileBitmasks
 
 ctypedef map[np.uint64_t, bool_array] CoarseRefinedSets
 
