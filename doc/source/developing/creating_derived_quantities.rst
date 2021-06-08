@@ -20,13 +20,16 @@ single arrays, and returns the final values.  For an example, we look at the
 .. code-block:: python
 
    def _TotalMass(data):
-       baryon_mass = data["cell_mass"].sum()
-       particle_mass = data["ParticleMassMsun"].sum()
+       baryon_mass = data["mass"].sum()
+       particle_mass = data["particle_mass"].sum()
        return baryon_mass, particle_mass
+
+
    def _combTotalMass(data, baryon_mass, particle_mass):
        return baryon_mass.sum() + particle_mass.sum()
-   add_quantity("TotalMass", function=_TotalMass,
-                combine_function=_combTotalMass, n_ret = 2)
+
+
+   add_quantity("TotalMass", function=_TotalMass, combine_function=_combTotalMass, n_ret=2)
 
 Once the two functions have been defined, we then call :func:`add_quantity` to
 tell it the function that defines the data, the collator function, and the

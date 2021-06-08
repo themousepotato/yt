@@ -1,3 +1,5 @@
+
+# distutils: libraries = STD_LIBS
 """
 A refine-by-two AMR-specific octree
 
@@ -8,15 +10,19 @@ A refine-by-two AMR-specific octree
 
 
 import numpy as np
-cimport numpy as np
-# Double up here for def'd functions
-cimport numpy as cnp
+
 cimport cython
 
-from yt.utilities.lib.fp_utils cimport imax, fmax, imin, fmin, iclip, fclip
-from libc.stdlib cimport malloc, free, abs
+# Double up here for def'd functions
+cimport numpy as np
+cimport numpy as cnp
+from libc.stdlib cimport abs, free, malloc
 
-import sys, time
+from yt.utilities.lib.fp_utils cimport fclip, fmax, fmin, iclip, imax, imin
+
+import sys
+import time
+
 
 cdef extern from "platform_dep.h":
     # NOTE that size_t might not be int
@@ -178,7 +184,7 @@ cdef class Octree:
             k = (pos[2] >= fac*(2*node.pos[2]+1))
             node = node.children[i][j][k]
         OTN_add_value(node, val, weight_val, level, treecode)
-            
+
     cdef OctreeNode *find_on_root_level(self, np.int64_t pos[3], int level):
         # We need this because the root level won't just have four children
         # So we find on the root level, then we traverse the tree.
@@ -187,8 +193,8 @@ cdef class Octree:
         j = <np.int64_t> (pos[1] / self.po2[level])
         k = <np.int64_t> (pos[2] / self.po2[level])
         return self.root_nodes[i][j][k]
-        
-    
+
+
     @cython.boundscheck(False)
     @cython.wraparound(False)
     def add_array_to_tree(self, int level,
@@ -303,7 +309,7 @@ cdef class Octree:
             dist += (p1 - p2) * (p1 - p2)
         dist = sqrt(dist)
         return dist
-    
+
     @cython.cdivision(True)
     cdef np.float64_t fbe_opening_angle(self, OctreeNode *node1,
             OctreeNode *node2):
@@ -412,7 +418,7 @@ cdef class Octree:
     cdef np.float64_t fbe_main(self, np.float64_t potential, int truncate,
             np.float64_t kinetic):
         # The work is done here. Starting at the top of the linked list of
-        # nodes, 
+        # nodes,
         cdef np.float64_t angle, dist
         cdef OctreeNode *this_node
         cdef OctreeNode *pair_node
@@ -458,7 +464,7 @@ cdef class Octree:
                     # nodes.
                     potential += this_node.val[0] * pair_node.val[0] / self.dist
                     if truncate and potential > kinetic: break
-                    # We can skip all the nodes that are contained within 
+                    # We can skip all the nodes that are contained within
                     # pair_node, saving time walking the linked list.
                     pair_node = pair_node.up_next
                 # If we've gotten this far, pair_node has children, but it's
@@ -477,7 +483,7 @@ cdef class Octree:
         np.ndarray[np.float64_t, ndim=1] root_dx, float opening_angle = 1.0):
         r"""Find the binding energy of an ensemble of data points using the
         treecode method.
-        
+
         Note: The first entry of the vals array MUST be Mass. Any other
         values will be ignored, including the weight array.
         """
@@ -555,11 +561,11 @@ cdef class Octree:
     def print_all_nodes(self):
         r"""
         Prints out information about all the nodes in the octree.
-        
+
         Parameters
         ----------
         None.
-        
+
         Examples
         --------
         >>> octree.print_all_nodes()
@@ -590,4 +596,3 @@ cdef class Octree:
                 free(self.root_nodes[i][j])
             free(self.root_nodes[i])
         free(self.root_nodes)
-

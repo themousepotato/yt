@@ -1,3 +1,4 @@
+# distutils: libraries = STD_LIBS
 """
 Bit array functions
 
@@ -7,16 +8,18 @@ Bit array functions
 
 
 import numpy as np
-cimport numpy as np
+
 cimport cython
-from libc.stdlib cimport malloc, free
+cimport numpy as np
+from libc.stdlib cimport free, malloc
+
 
 cdef class bitarray:
 
     @cython.boundscheck(False)
     @cython.wraparound(False)
     @cython.cdivision(True)
-    def __cinit__(self, np.int64_t size = -1, 
+    def __cinit__(self, np.int64_t size = -1,
                   np.ndarray[np.uint8_t, ndim=1, cast=True] arr = None):
         r"""This is a bitarray, which flips individual bits to on/off inside a
         uint8 container array.

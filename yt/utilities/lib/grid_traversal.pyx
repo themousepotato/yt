@@ -1,3 +1,9 @@
+# distutils: include_dirs = LIB_DIR
+# distutils: libraries = STD_LIBS
+# distutils: sources = FIXED_INTERP
+# distutils: language = c++
+# distutils: extra_compile_args = CPP14_FLAG
+# distutils: extra_link_args = CPP14_FLAG
 """
 Simple integrators for the radiative transfer equation
 
@@ -7,17 +13,29 @@ Simple integrators for the radiative transfer equation
 
 
 import numpy as np
-cimport numpy as np
+
 cimport cython
-#cimport healpix_interface
-from libc.stdlib cimport malloc, calloc, free, abs
-from libc.math cimport exp, floor, log2, \
-    fabs, atan, atan2, asin, cos, sin, sqrt, acos, M_PI, sqrt
-from yt.utilities.lib.fp_utils cimport imax, fmax, imin, fmin, iclip, fclip, i64clip
-from field_interpolation_tables cimport \
-    FieldInterpolationTable, FIT_initialize_table, FIT_eval_transfer,\
-    FIT_eval_transfer_with_light
+cimport numpy as np
 from fixed_interpolator cimport *
+from libc.math cimport (
+    M_PI,
+    acos,
+    asin,
+    atan,
+    atan2,
+    cos,
+    exp,
+    fabs,
+    floor,
+    log2,
+    sin,
+    sqrt,
+)
+
+#cimport healpix_interface
+from libc.stdlib cimport abs, calloc, free, malloc
+
+from yt.utilities.lib.fp_utils cimport fclip, fmax, fmin, i64clip, iclip, imax, imin
 
 DEF Nch = 4
 
@@ -78,7 +96,7 @@ cdef int walk_volume(VolumeContainer *vc,
            0.0 <= tl and tl < intersect_t:
             direction = i
             intersect_t = tl
-    if enter_t >= 0.0: intersect_t = enter_t 
+    if enter_t >= 0.0: intersect_t = enter_t
     if not ((0.0 <= intersect_t) and (intersect_t < max_t)): return 0
     for i in range(3):
         # Two things have to be set inside this loop.
@@ -349,5 +367,3 @@ def arr_fisheye_vectors(int resolution, np.float64_t fov, int nimx=1, int
             vp[i,j,1] = sin(theta) * sin(phi)
             vp[i,j,2] = cos(theta)
     return vp
-
-

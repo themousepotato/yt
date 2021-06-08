@@ -1,9 +1,9 @@
-from yt.fields.field_info_container import \
-    FieldInfoContainer
+from yt.fields.field_info_container import FieldInfoContainer
 
 # We need to specify which fields we might have in our dataset.  The field info
 # container subclass here will define which fields it knows about.  There are
 # optionally methods on it that get called which can be subclassed.
+
 
 class ExodusIIFieldInfo(FieldInfoContainer):
     known_other_fields = (
@@ -17,7 +17,7 @@ class ExodusIIFieldInfo(FieldInfoContainer):
     )
 
     def __init__(self, ds, field_list):
-        super(ExodusIIFieldInfo, self).__init__(ds, field_list)
+        super().__init__(ds, field_list)
         for name in self:
             self[name].take_log = False
         # If you want, you can check self.field_list

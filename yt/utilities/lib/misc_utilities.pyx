@@ -1,3 +1,7 @@
+# distutils: libraries = STD_LIBS
+# distutils: language = c++
+# distutils: extra_compile_args = CPP14_FLAG OMP_ARGS
+# distutils: extra_link_args = CPP14_FLAG OMP_ARGS
 """
 Simple utilities that don't fit anywhere else
 
@@ -6,22 +10,22 @@ Simple utilities that don't fit anywhere else
 """
 
 
-from yt.funcs import get_pbar
 import numpy as np
+
+from yt.funcs import get_pbar
 from yt.units.yt_array import YTArray
-cimport numpy as np
+
 cimport cython
 cimport libc.math as math
+cimport numpy as np
+from cpython cimport buffer
+from cython.view cimport array as cvarray, memoryview
 from libc.math cimport abs, sqrt
-from yt.utilities.lib.fp_utils cimport fmin, fmax, i64min, i64max
-from yt.geometry.selection_routines cimport _ensure_code
-
-from libc.stdlib cimport malloc, free
+from libc.stdlib cimport free, malloc
 from libc.string cimport strcmp
 
-from cython.view cimport memoryview
-from cython.view cimport array as cvarray
-from cpython cimport buffer
+from yt.geometry.selection_routines cimport _ensure_code
+from yt.utilities.lib.fp_utils cimport fmax, fmin, i64max, i64min
 
 
 cdef extern from "platform_dep.h":
@@ -29,7 +33,9 @@ cdef extern from "platform_dep.h":
     void *alloca(int)
 
 from cython.parallel import prange
+
 from cpython.exc cimport PyErr_CheckSignals
+
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -562,7 +568,9 @@ def get_box_grids_below_level(
 @cython.boundscheck(False)
 @cython.wraparound(False)
 def obtain_position_vector(
-    data, field_names = ('x', 'y', 'z')):
+    data,
+    field_names = (("index", "x"), ("index", "y"), ("index", "z"))
+):
     # This is just to let the pointers exist and whatnot.  We can't cdef them
     # inside conditionals.
     cdef np.ndarray[np.float64_t, ndim=1] xf
@@ -610,8 +618,10 @@ def obtain_position_vector(
 @cython.wraparound(False)
 @cython.cdivision(True)
 def obtain_relative_velocity_vector(
-        data, field_names = ("velocity_x", "velocity_y", "velocity_z"),
-        bulk_vector = "bulk_velocity"):
+        data,
+        field_names = (("gas", "velocity_x"), ("gas", "velocity_y"), ("gas", "velocity_z")),
+        bulk_vector = "bulk_velocity"
+    ):
     # This is just to let the pointers exist and whatnot.  We can't cdef them
     # inside conditionals.
     cdef np.ndarray[np.float64_t, ndim=1] vxf
@@ -623,11 +633,12 @@ def obtain_relative_velocity_vector(
     cdef np.ndarray[np.float64_t, ndim=3] vzg
     cdef np.ndarray[np.float64_t, ndim=4] rvg
     cdef np.float64_t bv[3]
-    cdef int i, j, k
+    cdef int i, j, k, dim
 
     units = data[field_names[0]].units
     bulk_vector = data.get_field_parameter(bulk_vector).to(units)
-    if len(data[field_names[0]].shape) == 1:
+    dim = data[field_names[0]].ndim
+    if dim == 1:
         # One dimensional data
         vxf = data[field_names[0]].astype("float64")
         vyf = data[field_names[1]].astype("float64")
@@ -647,7 +658,7 @@ def obtain_relative_velocity_vector(
             rvf[1, i] = vyf[i] - bv[1]
             rvf[2, i] = vzf[i] - bv[2]
         return rvf
-    else:
+    elif dim == 3:
         # Three dimensional data
         vxg = data[field_names[0]].astype("float64")
         vyg = data[field_names[1]].astype("float64")
@@ -670,6 +681,8 @@ def obtain_relative_velocity_vector(
                     rvg[1,i,j,k] = vyg[i,j,k] - bv[1]
                     rvg[2,i,j,k] = vzg[i,j,k] - bv[2]
         return rvg
+    else:
+        raise NotImplementedError(f"Unsupported dimensionality `{dim}`.")
 
 def grow_flagging_field(oofield):
     cdef np.ndarray[np.uint8_t, ndim=3] ofield = oofield.astype("uint8")
@@ -696,14 +709,16 @@ def grow_flagging_field(oofield):
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-def fill_region(input_fields, output_fields,
-                np.int32_t output_level,
-                np.ndarray[np.int64_t, ndim=1] left_index,
-                np.ndarray[np.int64_t, ndim=2] ipos,
-                np.ndarray[np.int64_t, ndim=1] ires,
-                np.ndarray[np.int64_t, ndim=1] level_dims,
-                np.ndarray[np.int64_t, ndim=1] refine_by
-                ):
+def fill_region(
+    input_fields,
+    output_fields,
+    np.int32_t output_level,
+    np.ndarray[np.int64_t, ndim=1] left_index,
+    np.ndarray[np.int64_t, ndim=2] ipos,
+    np.ndarray[np.int64_t, ndim=1] ires,
+    np.ndarray[np.int64_t, ndim=1] level_dims,
+    np.ndarray[np.int64_t, ndim=1] refine_by
+):
     cdef int i, n
     cdef np.int64_t tot = 0, oi, oj, ok
     cdef np.int64_t rf[3]
@@ -779,7 +794,7 @@ def fill_region(input_fields, output_fields,
 @cython.wraparound(False)
 @cython.cdivision(True)
 def flip_bitmask(np.ndarray[np.float64_t, ndim=1] vals,
-                 np.float64_t left_edge, np.float64_t right_edge, 
+                 np.float64_t left_edge, np.float64_t right_edge,
                  np.uint64_t nbins):
     cdef np.uint64_t i, bin_id
     cdef np.float64_t idx = nbins / (right_edge - left_edge)
@@ -881,7 +896,7 @@ def fill_region_float(np.ndarray[np.float64_t, ndim=2] fcoords,
         box_idds[i] = 1.0/box_dds[i]
         diter[i][0] = diter[i][1] = 0
         diterv[i][0] = diterv[i][1] = 0.0
-        overlap[i] = 1.0 
+        overlap[i] = 1.0
     with nogil:
         for p in range(fcoords.shape[0]):
             for i in range(3):
@@ -969,7 +984,7 @@ def gravitational_binding_energy(
     pbar = get_pbar("Calculating potential for %d cells with %d thread(s)" % (n_q,num_threads),
         n_q)
 
-    # using reversed iterator in order to make use of guided scheduling 
+    # using reversed iterator in order to make use of guided scheduling
     # (inner loop is getting more and more expensive)
     for q_outer in prange(n_q - 1,-1,-1,
         nogil=True,schedule='guided',num_threads=num_threads):
@@ -979,7 +994,7 @@ def gravitational_binding_energy(
         x_o = x[q_outer]
         y_o = y[q_outer]
         z_o = z[q_outer]
-        for q_inner in range(q_outer + 1, n_q): 
+        for q_inner in range(q_outer + 1, n_q):
             mass_i = mass[q_inner]
             x_i = x[q_inner]
             y_i = y[q_inner]
@@ -996,7 +1011,7 @@ def gravitational_binding_energy(
             PyErr_CheckSignals()
             # this call is not thread safe, but it gives a reasonable approximation
             pbar.update()
-    
+
     pbar.finish()
     return total_potential
 

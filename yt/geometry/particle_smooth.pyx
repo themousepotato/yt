@@ -1,3 +1,5 @@
+# distutils: include_dirs = LIB_DIR
+# distutils: libraries = STD_LIBS
 """
 Particle smoothing in cells
 
@@ -8,16 +10,15 @@ Particle smoothing in cells
 
 
 cimport numpy as np
+
 import numpy as np
+
 cimport cython
-
 from cpython.exc cimport PyErr_CheckSignals
-from libc.stdlib cimport malloc, free, realloc
+from libc.math cimport cos, fabs, sin, sqrt
+from libc.stdlib cimport free, malloc, realloc
 from libc.string cimport memmove
-from libc.math cimport sqrt, fabs, sin, cos
-
-from oct_container cimport \
-    Oct, OctreeContainer, OctInfo
+from oct_container cimport Oct, OctInfo, OctreeContainer
 
 
 cdef void spherical_coord_setup(np.float64_t ipos[3], np.float64_t opos[3]):
@@ -446,8 +447,8 @@ cdef class ParticleSmoothOperation:
         # domains for them, and the number of particles for each.
         cdef int ni, i, j, k
         cdef np.int64_t offset, pn, pc
-        cdef np.float64_t pos[3] 
-        cdef np.float64_t ex[2] 
+        cdef np.float64_t pos[3]
+        cdef np.float64_t ex[2]
         cdef np.float64_t DR[2]
         cdef np.float64_t cp, r2_trunc, r2, dist
         dq.neighbor_reset()

@@ -1,3 +1,5 @@
+
+# distutils: libraries = STD_LIBS
 """
 Simple readers for fortran unformatted data, specifically for the Tiger code.
 
@@ -7,11 +9,11 @@ Simple readers for fortran unformatted data, specifically for the Tiger code.
 
 
 import numpy as np
-cimport numpy as np
-cimport cython
 
-from libc.stdio cimport fopen, fclose, FILE
+cimport cython
 cimport libc.stdlib as stdlib
+cimport numpy as np
+from libc.stdio cimport FILE, fclose, fopen
 
 #cdef inline int imax(int i0, int i1):
     #if i0 > i1: return i0
@@ -316,4 +318,3 @@ def fill_child_mask(np.ndarray[np.int64_t, ndim=2] file_locations,
             for y in range(2):
                 for z in range(2):
                     child_mask[lex+x,ley+y,lez+z] = art_child_masks[ioct,x,y,z]
-
