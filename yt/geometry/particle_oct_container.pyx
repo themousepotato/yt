@@ -1,6 +1,7 @@
 # distutils: language = c++
 # distutils: extra_compile_args = CPP14_FLAG
-# distutils: libraries = STD_LIBS
+# distutils: include_dirs = LIB_DIR
+# distutils: libraries = EWAH_LIBS
 """
 Oct container tuned for Particles
 
@@ -10,12 +11,6 @@ Oct container tuned for Particles
 """
 
 
-from libc.math cimport ceil, floor, fmod
-from libc.stdlib cimport free, malloc, qsort
-from libc.string cimport memset
-from libcpp.map cimport map as cmap
-from libcpp.vector cimport vector
-
 from ewah_bool_utils.ewah_bool_array cimport (
     bool_array,
     ewah_bool_array,
@@ -23,6 +18,12 @@ from ewah_bool_utils.ewah_bool_array cimport (
     ewah_map,
     ewah_word_type,
 )
+from ewah_bool_utils.ewah_bool_wrap cimport BoolArrayCollection
+from libc.math cimport ceil, floor, fmod
+from libc.stdlib cimport free, malloc, qsort
+from libc.string cimport memset
+from libcpp.map cimport map as cmap
+from libcpp.vector cimport vector
 
 import numpy as np
 
@@ -63,12 +64,8 @@ from yt.funcs import get_pbar
 
 from particle_deposit cimport gind
 
-#from yt.utilities.lib.ewah_bool_wrap cimport \
-from ..utilities.lib.ewah_bool_wrap cimport BoolArrayCollection
-
 import os
 import struct
-import os
 
 # If set to 1, ghost cells are added at the refined level reguardless of if the
 # coarse cell containing it is refined in the selector.
@@ -480,7 +477,7 @@ cdef class ParticleBitmap:
             self.periodicity[i] = <np.uint8_t>periodicity[i]
             self.dims[i] = (1<<index_order1)
             self.dds[i] = (right_edge[i] - left_edge[i])/self.dims[i]
-            self.idds[i] = 1.0/self.dds[i] 
+            self.idds[i] = 1.0/self.dds[i]
             self.dds_mi1[i] = (right_edge[i] - left_edge[i]) / (1<<index_order1)
             self.dds_mi2[i] = self.dds_mi1[i] / (1<<index_order2)
         # We use 64-bit masks

@@ -200,6 +200,9 @@ def check_CPP14_flags(possible_compile_flags):
     )
     return []
 
+def get_ewah_bool_utils_path():
+    fullpath = resource_filename("ewah_bool_utils", "ewah_bool_wrap.pxd")
+    return os.path.dirname(os.path.abspath(fullpath))
 
 def check_for_pyembree(std_libs):
     embree_libs = []
