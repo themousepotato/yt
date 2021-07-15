@@ -264,7 +264,7 @@ class Dataset(abc.ABC):
     def periodicity(self, val):
         # remove this setter to break backward compatibility
         issue_deprecation_warning(
-            "Dataset.periodicity should not be overriden manually. "
+            "Dataset.periodicity should not be overridden manually. "
             "In the future, this will become an error. "
             "Use `Dataset.force_periodicity` instead.",
             since="4.0.0",
@@ -523,8 +523,6 @@ class Dataset(abc.ABC):
     @property
     def index(self):
         if self._instantiated_index is None:
-            if self._index_class is None:
-                raise RuntimeError("You should not instantiate Dataset.")
             self._instantiated_index = self._index_class(
                 self, dataset_type=self.dataset_type
             )
@@ -731,7 +729,7 @@ class Dataset(abc.ABC):
     def add_particle_filter(self, filter):
         """Add particle filter to the dataset.
 
-        Add ``filter`` to the dataset and set up relavent derived_field.
+        Add ``filter`` to the dataset and set up relevant derived_field.
         It will also add any ``filtered_type`` that the ``filter`` depends on.
 
         """
@@ -1338,7 +1336,7 @@ class Dataset(abc.ABC):
             except KeyError:
                 continue
 
-            # Now attempt to instanciate a unyt.unyt_quantity from val ...
+            # Now attempt to instantiate a unyt.unyt_quantity from val ...
             try:
                 # ... directly (valid if val is a number, or a unyt_quantity)
                 uo[key] = YTQuantity(val)
@@ -1937,7 +1935,7 @@ class ParticleDataset(Dataset):
 
 def validate_index_order(index_order):
     if index_order is None:
-        index_order = (7, 5)
+        index_order = (6, 2)
     elif not is_sequence(index_order):
         index_order = (int(index_order), 1)
     else:

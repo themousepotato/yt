@@ -10,13 +10,12 @@ from setupext import (
     check_for_openmp,
     check_for_pyembree,
     create_build_ext,
-    get_ewah_bool_utils_path,
     install_ccompiler,
 )
 
 install_ccompiler()
 
-VERSION = "4.0.dev0"
+VERSION = "4.1.dev0"
 
 if os.path.exists("MANIFEST"):
     os.remove("MANIFEST")
@@ -51,7 +50,6 @@ cythonize_aliases = {
         "yt/frontends/artio/artio_headers/",
     ],
     "STD_LIBS": std_libs,
-    "EWAH_LIBS": std_libs + [get_ewah_bool_utils_path()],
     "OMP_ARGS": omp_args,
     "FIXED_INTERP": "yt/utilities/lib/fixed_interpolator.cpp",
     "ARTIO_SOURCE": glob.glob("yt/frontends/artio/artio_headers/*.c"),
